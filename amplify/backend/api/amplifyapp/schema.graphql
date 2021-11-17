@@ -12,29 +12,33 @@ type User @model {
   event_id: [String]
 }
 
-type Sp_Event @model {
+type SpEvent @model {
   id: ID!
   name: String!
-  time: Number!
+  time: Int!
   manager: String!
   color: String!
-  people: Number!
-  start: String!
-  day: String!
+  people: Int!
+  start: AWSDateTime!
 }
 
-type Sub_Event @model {
+type days {
+  start_time: AWSTime!
+  dow: Int!
+}
+
+type SubEvent @model {
   id: ID!
   name: String!
-  time: Number!
+  time: Int!
   manager: String!
   color: String!
-  people: Number!
-  days: [Object]
+  people: Int!
+  days: [days]
 }
 
-type Del_Event @model {
+type DelEvent @model {
   id: ID!
-  day: String!
+  day: AWSDate!
   sub_event_id: String!
 }
