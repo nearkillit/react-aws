@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { API, Storage } from 'aws-amplify';
+// aws
+import { API, graphqlOperation, Storage } from 'aws-amplify';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
-import { listTodos } from './graphql/queries';
+// aws qraphQL
+import { listTodos, getTodo } from './graphql/queries';
 import { createTodo as createTodoMutation, deleteTodo as deleteTodoMutation } from './graphql/mutations';
 
 const initialFormState = { name: '', description: '' }
 
 function App() {
   const [Todos, setTodos] = useState([]);
-  const [formData, setFormData] = useState(initialFormState);
+  const [formData, setFormData] = useState(initialFormState);  
 
   useEffect(() => {
-    fetchTodos();
+    fetchTodos();        
   }, []);
 
   async function onChange(e) {
     if (!e.target.files[0]) return
     const file = e.target.files[0];
     setFormData({ ...formData, image: file.name });
-    await Storage.put(file.name, file);
+    await Storage.put(file.name, file);    
     fetchTodos();
   }
 
@@ -27,20 +29,23 @@ function App() {
     const apiData = await API.graphql({ query: listTodos });
     const todosFromAPI = apiData.data.listTodos.items;
     await Promise.all(todosFromAPI.map(async Todo => {
-    if (Todo.image) {
-      const image = await Storage.get(Todo.image);
-      Todo.image = image;
-    }
-    return Todo;
-  }))
-  setTodos(apiData.data.listTodos.items);
+      if (Todo.image) {
+        const image = await Storage.get(Todo.image);      
+        Todo.image = image;
+      }
+      return Todo;
+    }))
+
+    const apiDataById = await API.graphql(graphqlOperation(getTodo, {id: "25bbe2e8-3d85-4e95-a363-8794aaaddf64"}))
+    console.log(apiDataById);
+    setTodos(apiData.data.listTodos.items);
   }
 
   async function createTodo() {
     if (!formData.name || !formData.description) return;
     await API.graphql({ query: createTodoMutation, variables: { input: formData } });
     if (formData.image) {
-      const image = await Storage.get(formData.image);
+      const image = await Storage.get(formData.image);      
       formData.image = image;
     }
     setTodos([ ...Todos, formData ]);
@@ -48,6 +53,7 @@ function App() {
   }
 
   async function deleteTodo({ id }) {
+    console.log(id);
     const newTodosArray = Todos.filter(Todo => Todo.id !== id);
     setTodos(newTodosArray);
     await API.graphql({ query: deleteTodoMutation, variables: { input: { id } }});
@@ -55,7 +61,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>My Todos App</h1>
+      <h1>My Todos App</h1>      
       <input
         onChange={e => setFormData({ ...formData, 'name': e.target.value})}
         placeholder="Todo name"
@@ -75,6 +81,7 @@ function App() {
         {
           Todos.map(Todo => (
           <div key={Todo.id || Todo.name}>
+            <span>{Todo.id}</span>
             <h2>{Todo.name}</h2>
             <p>{Todo.description}</p>
             <button onClick={() => deleteTodo(Todo)}>Delete Todo</button>

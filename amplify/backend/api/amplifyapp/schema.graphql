@@ -4,3 +4,37 @@ type Todo @model {
   description: String
   image: String
 }
+
+type User @model {
+  id: ID!
+  name: String!
+  password: String!
+  event_id: [String]
+}
+
+type Sp_Event @model {
+  id: ID!
+  name: String!
+  time: Number!
+  manager: String!
+  color: String!
+  people: Number!
+  start: String!
+  day: String!
+}
+
+type Sub_Event @model {
+  id: ID!
+  name: String!
+  time: Number!
+  manager: String!
+  color: String!
+  people: Number!
+  days: [Object]
+}
+
+type Del_Event @model {
+  id: ID!
+  day: String!
+  sub_event_id: String!
+}
