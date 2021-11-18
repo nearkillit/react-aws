@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import { useAppSelector, useAppDispatch } from './app/hooks';
 // aws
-import { API, graphqlOperation, Storage } from 'aws-amplify';
+import { API, Auth, graphqlOperation, Storage } from 'aws-amplify';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
 // aws qraphQL
 import { listSubEvents } from './graphql/queries';
@@ -40,12 +40,13 @@ function App() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    // fetchSubEvents();        
+    fetchSubEvents();
   }, []);  
 
   async function fetchSubEvents() {
-    const apiData = await API.graphql({ query: listSubEvents });
-    console.log(apiData);    
+    // const apiData = await API.graphql({ query: listSubEvents });
+    const user = await Auth.currentAuthenticatedUser()
+    console.log(user);    
     // const apiDataById = await API.graphql(graphqlOperation(getTodo, {id: "25bbe2e8-3d85-4e95-a363-8794aaaddf64"}))
     // console.log(apiDataById);
     // setSubEvent(apiData.data.listTodos.items);
@@ -63,7 +64,7 @@ function App() {
   return (
     <div className="App">
       <button onClick={consoleStore}>state</button>
-      <button onClick={()=>dispatch(fetchSubEventAsync())}>fetchSubEventAsync</button>
+      <button onClick={()=>testAddSubEvent()}>testAddSubEvent</button>
       <Calender />      
       <AmplifySignOut />
     </div>

@@ -37,7 +37,7 @@ export const getUser = /* GraphQL */ `
     getUser(id: $id) {
       id
       name
-      password
+      email
       event_id
       createdAt
       updatedAt
@@ -54,7 +54,7 @@ export const listUsers = /* GraphQL */ `
       items {
         id
         name
-        password
+        email
         event_id
         createdAt
         updatedAt

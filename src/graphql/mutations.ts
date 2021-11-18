@@ -54,7 +54,7 @@ export const createUser = /* GraphQL */ `
     createUser(input: $input, condition: $condition) {
       id
       name
-      password
+      email
       event_id
       createdAt
       updatedAt
@@ -69,7 +69,7 @@ export const updateUser = /* GraphQL */ `
     updateUser(input: $input, condition: $condition) {
       id
       name
-      password
+      email
       event_id
       createdAt
       updatedAt
@@ -84,7 +84,7 @@ export const deleteUser = /* GraphQL */ `
     deleteUser(input: $input, condition: $condition) {
       id
       name
-      password
+      email
       event_id
       createdAt
       updatedAt
@@ -140,6 +140,48 @@ export const deleteSpEvent = /* GraphQL */ `
       color
       people
       start
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const createDelEvent = /* GraphQL */ `
+  mutation CreateDelEvent(
+    $input: CreateDelEventInput!
+    $condition: ModelDelEventConditionInput
+  ) {
+    createDelEvent(input: $input, condition: $condition) {
+      id
+      day
+      sub_event_id
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const updateDelEvent = /* GraphQL */ `
+  mutation UpdateDelEvent(
+    $input: UpdateDelEventInput!
+    $condition: ModelDelEventConditionInput
+  ) {
+    updateDelEvent(input: $input, condition: $condition) {
+      id
+      day
+      sub_event_id
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const deleteDelEvent = /* GraphQL */ `
+  mutation DeleteDelEvent(
+    $input: DeleteDelEventInput!
+    $condition: ModelDelEventConditionInput
+  ) {
+    deleteDelEvent(input: $input, condition: $condition) {
+      id
+      day
+      sub_event_id
       createdAt
       updatedAt
     }
@@ -203,48 +245,6 @@ export const deleteSubEvent = /* GraphQL */ `
         start_time
         dow
       }
-      createdAt
-      updatedAt
-    }
-  }
-`;
-export const createDelEvent = /* GraphQL */ `
-  mutation CreateDelEvent(
-    $input: CreateDelEventInput!
-    $condition: ModelDelEventConditionInput
-  ) {
-    createDelEvent(input: $input, condition: $condition) {
-      id
-      day
-      sub_event_id
-      createdAt
-      updatedAt
-    }
-  }
-`;
-export const updateDelEvent = /* GraphQL */ `
-  mutation UpdateDelEvent(
-    $input: UpdateDelEventInput!
-    $condition: ModelDelEventConditionInput
-  ) {
-    updateDelEvent(input: $input, condition: $condition) {
-      id
-      day
-      sub_event_id
-      createdAt
-      updatedAt
-    }
-  }
-`;
-export const deleteDelEvent = /* GraphQL */ `
-  mutation DeleteDelEvent(
-    $input: DeleteDelEventInput!
-    $condition: ModelDelEventConditionInput
-  ) {
-    deleteDelEvent(input: $input, condition: $condition) {
-      id
-      day
-      sub_event_id
       createdAt
       updatedAt
     }
