@@ -145,48 +145,6 @@ export const deleteSpEvent = /* GraphQL */ `
     }
   }
 `;
-export const createDelEvent = /* GraphQL */ `
-  mutation CreateDelEvent(
-    $input: CreateDelEventInput!
-    $condition: ModelDelEventConditionInput
-  ) {
-    createDelEvent(input: $input, condition: $condition) {
-      id
-      day
-      sub_event_id
-      createdAt
-      updatedAt
-    }
-  }
-`;
-export const updateDelEvent = /* GraphQL */ `
-  mutation UpdateDelEvent(
-    $input: UpdateDelEventInput!
-    $condition: ModelDelEventConditionInput
-  ) {
-    updateDelEvent(input: $input, condition: $condition) {
-      id
-      day
-      sub_event_id
-      createdAt
-      updatedAt
-    }
-  }
-`;
-export const deleteDelEvent = /* GraphQL */ `
-  mutation DeleteDelEvent(
-    $input: DeleteDelEventInput!
-    $condition: ModelDelEventConditionInput
-  ) {
-    deleteDelEvent(input: $input, condition: $condition) {
-      id
-      day
-      sub_event_id
-      createdAt
-      updatedAt
-    }
-  }
-`;
 export const createSubEvent = /* GraphQL */ `
   mutation CreateSubEvent(
     $input: CreateSubEventInput!
@@ -245,6 +203,48 @@ export const deleteSubEvent = /* GraphQL */ `
         start_time
         dow
       }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const createDelEvent = /* GraphQL */ `
+  mutation CreateDelEvent(
+    $input: CreateDelEventInput!
+    $condition: ModelDelEventConditionInput
+  ) {
+    createDelEvent(input: $input, condition: $condition) {
+      id
+      day
+      sub_event_id
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const updateDelEvent = /* GraphQL */ `
+  mutation UpdateDelEvent(
+    $input: UpdateDelEventInput!
+    $condition: ModelDelEventConditionInput
+  ) {
+    updateDelEvent(input: $input, condition: $condition) {
+      id
+      day
+      sub_event_id
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const deleteDelEvent = /* GraphQL */ `
+  mutation DeleteDelEvent(
+    $input: DeleteDelEventInput!
+    $condition: ModelDelEventConditionInput
+  ) {
+    deleteDelEvent(input: $input, condition: $condition) {
+      id
+      day
+      sub_event_id
       createdAt
       updatedAt
     }
