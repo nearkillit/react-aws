@@ -5,7 +5,15 @@ import { fetchSubEventsAPI,
          fetchSpEventsAPI, 
          fetchDelEventsAPI, 
          createSubEventAPI,
-         createSubEventType } from "./eventAPI"
+         createSpEventAPI,
+         createDelEventAPI,
+         updateSubEventAPI,
+         updateSpEventAPI,
+         updateDelEventAPI,
+         crudSubEventType,
+         crudSpEventType,
+         crudDelEventType,
+        } from "./eventAPI"
 
 //////// state ////////
 export type eventState = {
@@ -52,8 +60,16 @@ export const fetchSubEventAsync = createAsyncThunk(
 
 export const createSubEventAsync = createAsyncThunk(
     'event/createSubEvent',
-    async (data:createSubEventType) => {            
+    async (data: crudSubEventType) => {            
       const response = await createSubEventAPI(data);
+      return response;
+    }
+  );
+
+export const updateSubEventAsync = createAsyncThunk(
+    'event/updateSubEvent',
+    async (data: crudSubEventType) => {            
+      const response = await updateSubEventAPI(data);
       return response;
     }
   );
@@ -66,6 +82,22 @@ export const fetchSpEventAsync = createAsyncThunk(
     }
   );
 
+  export const createSpEventAsync = createAsyncThunk(
+    'event/createSpEvent',
+    async (data: crudSpEventType) => {            
+      const response = await createSpEventAPI(data);
+      return response;
+    }
+  );
+
+export const updateSpEventAsync = createAsyncThunk(
+    'event/updateSpEvent',
+    async (data: crudSpEventType) => {            
+      const response = await updateSpEventAPI(data);
+      return response;
+    }
+  );
+
 export const fetchDelEventAsync = createAsyncThunk(
     'event/fetchDelEvent',
     async () => {            
@@ -73,6 +105,22 @@ export const fetchDelEventAsync = createAsyncThunk(
       return response;
     }
   );  
+
+export const createDelEventAsync = createAsyncThunk(
+    'event/createDelEvent',
+    async (data: crudDelEventType) => {            
+      const response = await createDelEventAPI(data);
+      return response;
+    }
+  );
+
+export const updateDelEventAsync = createAsyncThunk(
+    'event/updateDelEvent',
+    async (data: crudDelEventType) => {            
+      const response = await updateDelEventAPI(data);
+      return response;
+    }
+  );
 
 //////// Slice ////////  
 export const eventSlice = createSlice({
@@ -97,11 +145,17 @@ export const eventSlice = createSlice({
       .addCase(fetchSubEventAsync.fulfilled, (state, action:any) => {
         state.sub_event = action.payload.data.listSubEvents.items
         state.sub_event_status = 'completed';
-      })//
+      })//state change
       .addCase(createSubEventAsync.pending, (state) => {
         state.sub_event_status = 'loading';
-      })//
+      })//state change
       .addCase(createSubEventAsync.fulfilled, (state, action:any) => {
+        console.log(action.payload);        
+      })//state change
+      .addCase(updateSubEventAsync.pending, (state) => {
+        state.sub_event_status = 'loading';
+      })//state change
+      .addCase(updateSubEventAsync.fulfilled, (state, action:any) => {
         console.log(action.payload);        
       })
       .addCase(fetchSpEventAsync.pending, (state) => {
@@ -110,6 +164,18 @@ export const eventSlice = createSlice({
       .addCase(fetchSpEventAsync.fulfilled, (state, action:any) => {
         state.sp_event = action.payload.data.listSpEvents.items
         state.sp_event_status = 'completed';   
+      })//state change
+      .addCase(createSpEventAsync.pending, (state) => {
+        state.sp_event_status = 'loading';
+      })//state change
+      .addCase(createSpEventAsync.fulfilled, (state, action:any) => {
+        console.log(action.payload);        
+      })//state change
+      .addCase(updateSpEventAsync.pending, (state) => {
+        state.sp_event_status = 'loading';
+      })//state change
+      .addCase(updateSpEventAsync.fulfilled, (state, action:any) => {
+        console.log(action.payload);        
       })
       .addCase(fetchDelEventAsync.pending, (state) => {
         state.sp_event_status = 'loading';
@@ -117,7 +183,20 @@ export const eventSlice = createSlice({
       .addCase(fetchDelEventAsync.fulfilled, (state, action:any) => {
         state.del_event = action.payload.data.listDelEvents.items
         state.del_event_status = 'completed';   
+      })//state change
+      .addCase(createDelEventAsync.pending, (state) => {
+        state.del_event_status = 'loading';
+      })//state change
+      .addCase(createDelEventAsync.fulfilled, (state, action:any) => {
+        console.log(action.payload);        
+      })//state change
+      .addCase(updateDelEventAsync.pending, (state) => {
+        state.del_event_status = 'loading';
+      })//state change
+      .addCase(updateDelEventAsync.fulfilled, (state, action:any) => {
+        console.log(action.payload);        
       })
+
   },
 });
 

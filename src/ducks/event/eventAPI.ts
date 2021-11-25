@@ -1,20 +1,16 @@
 // aws
-import { API } from 'aws-amplify';
+import { API, graphqlOperation } from 'aws-amplify';
 // aws qraphQL
 import { listSubEvents, listSpEvents, listDelEvents, listUsersId } from '../../graphql/queries';
-import { createSpEvent, createSubEvent } from '../../graphql/mutations'
-
-export async function fetchSubEventsAPI() {
-    const apiData = await API.graphql({ query: listSubEvents });    
-    return apiData
-}
+import { createSpEvent, updateSpEvent, createSubEvent, updateSubEvent, createDelEvent, updateDelEvent } from '../../graphql/mutations'
 
 export type subEventDays = {
   start_time: string,
   dow: number
 }
 
-export type createSubEventType = {
+export type crudSubEventType = {
+  id?: string,
   name: string,
   time: number,
   manager: string,
@@ -23,20 +19,66 @@ export type createSubEventType = {
   days: Array<subEventDays>,  
 }
 
-export async function createSubEventAPI(data: createSubEventType) {  
+export type crudSpEventType = {
+  id?: string,
+  name: string,
+  time: number,
+  manager: string,
+  color: string,
+  people: number,
+  start: string,  
+}
+
+export type crudDelEventType = {
+  id?: string,  
+  day: string,
+  sub_event_id: string[]
+}
+
+export async function fetchSubEventsAPI() {
+  const apiData = await API.graphql({ query: listSubEvents });    
+  return apiData
+}
+
+export async function createSubEventAPI(data: crudSubEventType) {  
   const apiData = await API.graphql({ query: createSubEvent, variables: { input: data } });    
   return apiData
 }
 
+export async function updateSubEventAPI(input: crudSubEventType){
+  const apiData = await API.graphql(graphqlOperation(updateSubEvent,{ input }))    
+  return apiData
+}
+
 export async function fetchSpEventsAPI() {
-    const apiData = await API.graphql({ query: listSpEvents });        
-    return apiData
+  const apiData = await API.graphql({ query: listSpEvents });        
+  return apiData
 }  
+
+export async function createSpEventAPI(data: crudSpEventType) {  
+  const apiData = await API.graphql({ query: createSpEvent, variables: { input: data } });    
+  return apiData
+}
+
+export async function updateSpEventAPI(input: crudSpEventType ){
+  const apiData = await API.graphql(graphqlOperation(updateSpEvent,{ input }))    
+  return apiData
+}
 
 export async function fetchDelEventsAPI() {
     const apiData = await API.graphql({ query: listDelEvents });        
     return apiData
 }  
+
+export async function createDelEventAPI(data: crudDelEventType) {  
+  const apiData = await API.graphql({ query: createDelEvent, variables: { input: data } });    
+  return apiData
+}
+
+export async function updateDelEventAPI(input: crudDelEventType){
+  const apiData = await API.graphql(graphqlOperation(updateDelEvent,{ input }))    
+  return apiData
+}
 
 interface getEventReserveType{
   event_id: string,

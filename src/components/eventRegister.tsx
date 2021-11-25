@@ -6,7 +6,7 @@ import {
 import { useForm } from 'react-hook-form'
 // component
 import { selectState, createSubEventAsync } from '../ducks/event/eventSlice';
-import { createSubEventType, subEventDays } from '../ducks/event/eventAPI'
+import { crudSubEventType, subEventDays } from '../ducks/event/eventAPI'
 import { updateUserAsync } from '../ducks/user/userSlice';
 import { useAppSelector, useAppDispatch } from '../app/hooks';
 // mui
@@ -142,7 +142,7 @@ const SubEventRegister = () => {
         const cDMinute = cD.minute < 10 ? `0${cD.minute}` : String(cD.minute)
         return { dow: cD.dow, start_time: `${cDHour}:${cDMinute}:00.000` }
       })
-      const addData: createSubEventType = 
+      const addData: crudSubEventType = 
                       { name: data.name, 
                         manager: data.manager, 
                         people: Number(data.people),
