@@ -2,17 +2,14 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import { useAppSelector, useAppDispatch } from './app/hooks';
 import { Routes, 
-         Route,
-         useParams,         
-         useLocation,         
+         Route,               
          } from "react-router-dom";         
-import { createBrowserHistory } from 'history';
 // aws
 import { API, Auth, graphqlOperation, Storage } from 'aws-amplify';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
 // aws qraphQL
-import { getUser, listSubEvents, listSpEvents, listDelEvents } from './graphql/queries';
-import { createSubEvent, createSpEvent } from './graphql/mutations';
+import { getUser, listSubEvents, listSpEvents, listDelEvents, listUsersId } from './graphql/queries';
+import { createSubEvent, createSpEvent, createDelEvent } from './graphql/mutations';
 
 // components
 import Calender from "./components/calender"
@@ -23,6 +20,7 @@ import {
   fetchSpEventAsync,
   fetchDelEventAsync,
 } from './ducks/event/eventSlice';
+import { fetchAllUserEventAPI } from './ducks/event/eventAPI'
 import {  
   selectState as userState,
   fetchUserDataAsync,
@@ -30,6 +28,8 @@ import {
 } from './ducks/user/userSlice';
 // types
 import { subEventType } from "./types/apidata"
+import Admin from './components/eventRegister';
+import SubEventRegister from './components/eventRegister';
 
 // SubEvent
 const instanData = {
@@ -46,19 +46,25 @@ const instanData = {
   
 }
 // SubEvent
+// const instantData = {
+//   name: "テストイベント",
+//   time: 60,
+//   manager: "テスト担当者",
+//   color: "#FFF",
+//   people: 20,
+//   start: "2019-04-11T04:59:22.088Z"
+// }
+// delevent
+// id: string,
+  // day: string,
+  // sub_event_id: string,
+  // updatedAt: string
 const instantData = {
-  name: "テストイベント",
-  time: 60,
-  manager: "テスト担当者",
-  color: "#FFF",
-  people: 20,
-  start: "2019-04-11T04:59:22.088Z"
-}
+    day: "2021-11-29",
+    sub_event_id: "b124ea84-905c-4156-a0c3-7c3b1ef59dd1",    
+  }
 
-function App() {
-  const [subEvent, setSubEvent] = useState<subEventType>();  
-  const event_state = useAppSelector(eventState);
-  const user_state = useAppSelector(userState);
+function App() {  
   const state = useAppSelector(userState);
   const dispatch = useAppDispatch();
 
@@ -77,43 +83,36 @@ function App() {
     // const apiDataById = await API.graphql(graphqlOperation(getUser, {id:"f9c852a2-b122-41a6-a535-f27379d2a066"}));
     // console.log(apiDataById);
     
-  }  
-  // Cannot return null for non-nullable type: 'AWSDateTime' within parent 'User' (/getUser/createdAt)
+  }    
 
-  async function testAddSubEvent() {    
-    const res = await API.graphql({ query: createSubEvent, variables: { input: instanData } });
+  async function testAdd() {    
+    const res = await API.graphql({ query: createDelEvent, variables: { input: instantData } });
     console.log(res);
   }
-
-  async function testAddSpEvent() {    
-    const res = await API.graphql({ query: createSpEvent, variables: { input: instantData } });
-    console.log(res);
-  }
+  
 
   function consoleStore() {
     console.log(state);
   }
 
-  async function fetchSubEventAsyncs() {
-    const apiData = await API.graphql({ query: listSubEvents });
-    console.log(apiData);
-  }
+  // async function fetchUserDataAsyncs() {    
+  //   dispatch(fetchUserDataAsync(state.user.user_id))    
+  // }
 
-  async function fetchUserDataAsyncs() {    
-    dispatch(fetchUserDataAsync(state.user.user_id))    
-  }
+  useEffect(()=>{
+    state.user.user_id && dispatch(fetchUserDataAsync(state.user.user_id))    
+  },[state.user.user_id])
 
   return (
     <div className="App">
-      { user_state.user.user_name !== "" && 
-      <h2>ようこそ！ {user_state.user.user_name}さん</h2>}
-      <button onClick={consoleStore}>state</button>
-      <button onClick={()=>dispatch(fetchUserAsync())}>fetchUserAsync</button>
-      <button onClick={()=>dispatch(fetchSubEventAsync())}>fetchSubEventAsyncs</button>
-      <button onClick={fetchUserDataAsyncs}>fetchUserDataAsyncs</button>      
+      { state.user.user_name !== "" && 
+      <h2>ようこそ！ {state.user.user_name}さん({state.user.user_group.includes("admin") && "＊管理者＊"})
+      </h2>}
+      <button onClick={consoleStore}>state</button>                 
       <Routes>
         <Route path="/" element={<Calender />} />
-        <Route path="/reserve/:id" element={<Reserve />}/>        
+        <Route path="reserve/:id" element={<Reserve />}/>  
+        <Route path="subeventregi/:id" element={<SubEventRegister />}/>        
         <Route element={<h1>404 Not Found</h1>} />                  
       </Routes>      
       <AmplifySignOut />

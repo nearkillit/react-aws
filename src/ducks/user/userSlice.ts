@@ -1,14 +1,15 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState, AppThunk } from '../../app/store';
 import { userType } from "../../types/apidata"
-import { fetchUserDataAPI, fetchUserAPI } from "./userAPI"
+import { fetchUserDataAPI, fetchUserAPI, updateUserAPI } from "./userAPI"
 
 //////// state ////////
 export type userState = {
   user: userType,
   user_id: string,
   user_name: string,
-  user_status: 'idle' | 'loading' | 'failed',  
+  user_status: 'idle' | 'loading' | 'failed',
+  user_group: string[]
 }
 
 const intialUserState: userType = {
@@ -23,10 +24,14 @@ const initialState: userState = {
   user: intialUserState,
   user_id: "",
   user_name: "",
-  user_status: "idle",  
+  user_status: "idle",
+  user_group: []
 };
 
-
+export interface updateUserType {
+  id: string,
+  event_id: string[]
+}
 
 //////// AsyncThunk //////// 
 export const fetchUserDataAsync = createAsyncThunk(
@@ -45,6 +50,14 @@ export const fetchUserAsync = createAsyncThunk(
     }
   );  
 
+export const updateUserAsync = createAsyncThunk(
+    'user/updateUser',
+    async (data:updateUserType) => {            
+      const response = await updateUserAPI(data);
+      return response;
+    }
+  );  
+
 //////// Slice ////////  
 export const userSlice = createSlice({
   name: 'user',
@@ -58,8 +71,8 @@ export const userSlice = createSlice({
         state.user_status = 'loading';
       })
       .addCase(fetchUserDataAsync.fulfilled, (state, action:any) => {
-        // state.user = action.payload.data
-        console.log(action);
+        state.user.event_id = action.payload.data.getUser.event_id
+        state.user.updatedAt = action.payload.data.getUser.updatedAt        
         state.user_status = 'idle';
       })
       .addCase(fetchUserAsync.pending, (state) => {
@@ -69,6 +82,16 @@ export const userSlice = createSlice({
         state.user_id = action.payload.user_id
         state.user_name = action.payload.user_name
         state.user_status = 'idle';
+        state.user_group = action.payload.user_group
+      })
+      .addCase(updateUserAsync.pending, (state) => {
+        state.user_status = 'loading';
+      })
+      .addCase(updateUserAsync.fulfilled, (state, action:any) => {        
+        // state = action.payload
+        console.log("user update ");        
+        console.log(action);
+        
       })
   },
 });

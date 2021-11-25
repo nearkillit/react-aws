@@ -63,6 +63,21 @@ export const listUsers = /* GraphQL */ `
     }
   }
 `;
+export const listUsersId = /* GraphQL */ `
+  query ListUsers(
+    $filter: ModelUserFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listUsers(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id        
+        event_id                
+      }
+      nextToken
+    }
+  }
+`;
 export const getSpEvent = /* GraphQL */ `
   query GetSpEvent($id: ID!) {
     getSpEvent(id: $id) {

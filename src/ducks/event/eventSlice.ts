@@ -1,16 +1,20 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState, AppThunk } from '../../app/store';
 import { subEventType, spEventType, delEventType } from "../../types/apidata"
-import { fetchSubEventsAPI, fetchSpEventsAPI, fetchDelEventsAPI } from "./eventAPI"
+import { fetchSubEventsAPI, 
+         fetchSpEventsAPI, 
+         fetchDelEventsAPI, 
+         createSubEventAPI,
+         createSubEventType } from "./eventAPI"
 
 //////// state ////////
 export type eventState = {
   sub_event: Array<subEventType>,
-  sub_event_status: 'idle' | 'loading' | 'failed',
+  sub_event_status: 'idle' | 'loading' | 'failed' | 'completed' ,
   sp_event: Array<spEventType>,
-  sp_event_status: 'idle' | 'loading' | 'failed',
+  sp_event_status: 'idle' | 'loading' | 'failed' | 'completed',
   del_event: Array<delEventType>,
-  del_event_status: 'idle' | 'loading' | 'failed',
+  del_event_status: 'idle' | 'loading' | 'failed' | 'completed',
 }
 
 const initialState: eventState = {
@@ -46,6 +50,14 @@ export const fetchSubEventAsync = createAsyncThunk(
     }
   );
 
+export const createSubEventAsync = createAsyncThunk(
+    'event/createSubEvent',
+    async (data:createSubEventType) => {            
+      const response = await createSubEventAPI(data);
+      return response;
+    }
+  );
+  
 export const fetchSpEventAsync = createAsyncThunk(
     'event/fetchSpEvent',
     async () => {            
@@ -84,21 +96,27 @@ export const eventSlice = createSlice({
       })
       .addCase(fetchSubEventAsync.fulfilled, (state, action:any) => {
         state.sub_event = action.payload.data.listSubEvents.items
-        state.sub_event_status = 'idle';
+        state.sub_event_status = 'completed';
+      })//
+      .addCase(createSubEventAsync.pending, (state) => {
+        state.sub_event_status = 'loading';
+      })//
+      .addCase(createSubEventAsync.fulfilled, (state, action:any) => {
+        console.log(action.payload);        
       })
       .addCase(fetchSpEventAsync.pending, (state) => {
         state.sp_event_status = 'loading';
       })
       .addCase(fetchSpEventAsync.fulfilled, (state, action:any) => {
         state.sp_event = action.payload.data.listSpEvents.items
-        state.sp_event_status = 'idle';   
+        state.sp_event_status = 'completed';   
       })
       .addCase(fetchDelEventAsync.pending, (state) => {
         state.sp_event_status = 'loading';
       })
       .addCase(fetchDelEventAsync.fulfilled, (state, action:any) => {
         state.del_event = action.payload.data.listDelEvents.items
-        state.del_event_status = 'idle';   
+        state.del_event_status = 'completed';   
       })
   },
 });
@@ -106,5 +124,8 @@ export const eventSlice = createSlice({
 //////// export ////////  
 // export const { increment, decrement, incrementByAmount } = eventSlice.actions;
 export const selectState = (state: RootState) => state;
+export const selectSubEvent = (state: RootState) => state.event.sub_event;
+export const selectSpEvent = (state: RootState) => state.event.sp_event;
+export const selectDelEvent = (state: RootState) => state.event.del_event;
 
 export default eventSlice.reducer;

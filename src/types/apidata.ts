@@ -37,6 +37,6 @@ export type userType = {
   id: string,
   name: string,
   email: string,
-  event_id: Array<String>,
+  event_id: Array<string>,
   updatedAt: string
 }
