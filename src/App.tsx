@@ -4,6 +4,7 @@ import { useAppSelector, useAppDispatch } from './app/hooks';
 import { Routes, 
          Route,               
          } from "react-router-dom";         
+import { useNavigate } from 'react-router-dom';
 // aws
 import { API, Auth, graphqlOperation, Storage } from 'aws-amplify';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
@@ -30,35 +31,9 @@ import {
 import { subEventType } from "./types/apidata"
 import Admin from './components/eventRegister';
 import SubEventRegister from './components/eventRegister';
+// mui
+import Button from '@mui/material/Button'
 
-// SubEvent
-const instanData = {
-  name: "テストイベント",
-  time: 60,
-  manager: "テスト担当者",
-  color: "#FFF",
-  people: 20,
-  days: [
-    { start_time: "18:00:00.000", dow: 1},
-    { start_time: "19:00:00.000", dow: 3},
-    { start_time: "17:30:00.000", dow: 5},
-  ]
-  
-}
-// SubEvent
-// const instantData = {
-//   name: "テストイベント",
-//   time: 60,
-//   manager: "テスト担当者",
-//   color: "#FFF",
-//   people: 20,
-//   start: "2019-04-11T04:59:22.088Z"
-// }
-// delevent
-// id: string,
-  // day: string,
-  // sub_event_id: string,
-  // updatedAt: string
 const instantData = {
     day: "2021-11-29",
     sub_event_id: "b124ea84-905c-4156-a0c3-7c3b1ef59dd1",    
@@ -67,6 +42,7 @@ const instantData = {
 function App() {  
   const state = useAppSelector(userState);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchUserAsync())
@@ -90,7 +66,6 @@ function App() {
     console.log(res);
   }
   
-
   function consoleStore() {
     console.log(state);
   }
@@ -108,6 +83,11 @@ function App() {
       { state.user.user_name !== "" && 
       <h2>ようこそ！ {state.user.user_name}さん({state.user.user_group.includes("admin") && "＊管理者＊"})
       </h2>}
+      {state.user.user_group.includes("admin") && 
+      <span>
+        <Button onClick={()=>navigate('/subeventregi/sub')}>定期イベント新規登録 </Button>
+        <Button onClick={()=>navigate('/subeventregi/sp')}>特殊イベント新規登録</Button>
+      </span>}
       <button onClick={consoleStore}>state</button>                 
       <Routes>
         <Route path="/" element={<Calender />} />
