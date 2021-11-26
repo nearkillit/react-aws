@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+    frontend:
+        container_name: react-aws
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - 3000:3000
+        command: sh -c 'cd /react-aws && npm start'
+        environment:
+            TZ: Asia/Tokyo
+        tty: true
+        volumes:
+            - ./:/react-aws
+            - /react-aws/node_modules/
