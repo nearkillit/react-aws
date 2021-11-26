@@ -151,12 +151,18 @@ export const eventSlice = createSlice({
       })//state change
       .addCase(createSubEventAsync.fulfilled, (state, action:any) => {
         console.log(action.payload);        
-      })//state change
+      })
       .addCase(updateSubEventAsync.pending, (state) => {
         state.sub_event_status = 'loading';
-      })//state change
-      .addCase(updateSubEventAsync.fulfilled, (state, action:any) => {
-        console.log(action.payload);        
+      })
+      .addCase(updateSubEventAsync.fulfilled, (state, action:any) => {        
+        state.sub_event = state.sub_event.map(se=>{
+          if(se.id === action.payload.data.updateSubEvent.id){
+            return action.payload.data.updateSubEvent
+          }else{
+            return se
+          }           
+        })                
       })
       .addCase(fetchSpEventAsync.pending, (state) => {
         state.sp_event_status = 'loading';

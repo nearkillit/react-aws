@@ -5,8 +5,14 @@ import {
     } from "react-router-dom";    
 import { useForm } from 'react-hook-form'
 // component
-import { selectState, createSubEventAsync } from '../ducks/event/eventSlice';
-import { crudSubEventType, subEventDays } from '../ducks/event/eventAPI'
+import { selectState, 
+         createSubEventAsync, 
+         updateSubEventAsync,
+         createSpEventAsync,
+         updateSpEventAsync,
+         createDelEventAsync,
+         updateDelEventAsync, } from '../ducks/event/eventSlice';
+import { crudSubEventType, crudSpEventType, subEventDays } from '../ducks/event/eventAPI'
 import { updateUserAsync } from '../ducks/user/userSlice';
 import { useAppSelector, useAppDispatch } from '../app/hooks';
 // mui
@@ -64,6 +70,7 @@ const useStyles = makeStyles(() => {
 })
 
 interface submitEventType {  
+  id?: string,
   name: string,  
   manager: string,  
   people: number,  
@@ -84,7 +91,7 @@ const initialCheckDays = {
   minute: 0,
 }
 
-const initialDefaultSubEvent = {
+const initialDefaultEvent = {
   name: "",  
   manager: "",  
   people: 1,  
@@ -98,14 +105,16 @@ const SubEventRegister = () => {
     const dispatch = useAppDispatch();
     const classes = useStyles();
     const [ eventState, setEventState ] = useState<string>("")
+    const [ newRegiState, setNewRegiState ] = useState<Boolean>(false)
     const [ checkDays, setCheckDays ] = useState<checkDaysType[]>([Object.assign({},initialCheckDays)]);
     const [ checkDay, setCheckDay ] = useState<Date>();
-    const [ defaultSubEvent, setDefaultSubEvent] = useState<submitEventType>(initialDefaultSubEvent)
-    const { register, handleSubmit, formState: {errors} } = useForm()
+    const [ defaultEvent, setDefaultEvent] = useState<submitEventType>(initialDefaultEvent)
+    const { register, handleSubmit, formState: {errors}, setValue } = useForm({shouldUnregister: false,})
     const dayOfWeek = ["日","月","火","水","木","金","土"]
     const hours = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
-    const minutes = [0,10,20,30,40,50]
+    const minutes = [0,10,20,30,40,50]    
 
+    // 日付の更新 //
     const checkDayChange = (event:  Date | null) => {
       event && setCheckDay(event)
     }
@@ -129,20 +138,28 @@ const SubEventRegister = () => {
       setCheckDays(newCheckDays)      
     }
 
+
+    // サブミット
     const onSubmit = async (data: submitEventType) => {      
       if(checkDays.length > 1 ){
         if(checkEqualDays()){
           alert("同じ日付のイベントがあります")
           return
         }        
-      }        
-      alert("イベントを追加しました")
+      }
+      newRegiState ? alert("イベントを追加しました") : alert("イベントを更新しました")      
       const newDatetime = checkDays.map(cD => {
         const cDHour = cD.hour < 10 ? `0${cD.hour}` : String(cD.hour)
         const cDMinute = cD.minute < 10 ? `0${cD.minute}` : String(cD.minute)
         return { dow: cD.dow, start_time: `${cDHour}:${cDMinute}:00.000` }
       })
-      const addData: crudSubEventType = 
+      
+      // 重複チェックする！！！！
+      // 重複の前に、それぞれのAsyncのチェック
+
+      if(eventState === "sub"){
+
+        let addData: crudSubEventType = 
                       { name: data.name, 
                         manager: data.manager, 
                         people: Number(data.people),
@@ -150,11 +167,47 @@ const SubEventRegister = () => {
                         color: "#fff",
                         days: newDatetime
                       }      
-      // dataの追加
-      dispatch(createSubEventAsync(addData))
+        if(newRegiState){
+          dispatch(createSubEventAsync(addData))
+        }else{
+          addData.id = defaultEvent.id
+          dispatch(updateSubEventAsync(addData))
+        }
+      }else if(eventState === "sp"){                
+
+        const addData: crudSpEventType = 
+                      { name: data.name, 
+                        manager: data.manager, 
+                        people: Number(data.people),
+                        time: Number(data.time),
+                        color: "#fff",
+                        start: convertDateintoAWSDateTime(checkDay as Date)
+                      }
+
+        if(newRegiState){
+          dispatch(createSpEventAsync(addData))
+        }else{
+          addData.id = defaultEvent.id
+          dispatch(updateSpEventAsync(addData))
+        }
+      }      
+
       navigate(`/`)        
     }
     
+    // 日付の変換　Date型　⇨　AWSDateTime
+    function convertDateintoAWSDateTime(getDate: Date){
+      const YYYY = getDate.getFullYear()
+      const MM = ( getDate.getMonth() + 1 ) < 10 ? `0${getDate.getMonth() + 1}` : (getDate.getMonth() + 1)
+      const DD = getDate.getDay() < 10 ? `0${getDate.getDay()}` : getDate.getDay()
+      const hh = getDate.getHours() < 10 ? `0${getDate.getHours()}` : getDate.getHours()
+      const mm = getDate.getMinutes() < 10 ? `0${getDate.getMinutes()}` : getDate.getMinutes()
+      const ss = getDate.getSeconds() < 10 ? `0${getDate.getSeconds()}` : getDate.getSeconds()
+      return `${YYYY}-${MM}-${DD}T${hh}-${mm}-${ss}.000Z`
+    }
+
+
+    // 同一イベントで日時の重複チェック //
     function checkEqualDays() {      
       const checkCheckDays = checkDays.map(cd => `${cd.dow}${cd.hour < 10 ? "0" + String(cd.hour) : String(cd.hour)}${cd.minute < 10 ? "0" + String(cd.minute) : String(cd.minute)}`)
       return existsSameValue(checkCheckDays)
@@ -163,17 +216,9 @@ const SubEventRegister = () => {
     function existsSameValue(arr: string[]){
       var s = new Set(arr);
       return s.size !== arr.length;
-    }
+    }    
 
-    useEffect(()=>{
-      if(id){
-        id.length > 37 ? 
-        serchSubEvent(id)
-        :    
-        serchSpEvent(id)
-      }
-    },[])
-
+    // paramsのidからイベントの詳細を検索（イベントの更新）//
     function serchSubEvent(id: string) {
       setEventState("sub")
       const subEventId = id.substring(0,36)
@@ -186,11 +231,16 @@ const SubEventRegister = () => {
                  hour: Number(gSED.start_time.substring(0,2)), 
                  minute: Number(gSED.start_time.substring(3,5))  }})
 
-      setDefaultSubEvent({name: getSubEvent.name ,
+      setDefaultEvent({   id: subEventId,
+                          name: getSubEvent.name ,
                           manager: getSubEvent.manager,
                           people: getSubEvent.people,
                           time: getSubEvent.time,                          
                           })
+      setValue('name',getSubEvent.name)
+      setValue('manager',getSubEvent.manager)
+      setValue('people',getSubEvent.people)
+      setValue('time',getSubEvent.time)
       setCheckDays(getSubEventDay)      
     }
 
@@ -198,14 +248,32 @@ const SubEventRegister = () => {
       setEventState("sp")
       const getSpEvent = state.event.sp_event.filter(se => se.id === id)[0]
 
-      setDefaultSubEvent({name: getSpEvent.name ,
+      setDefaultEvent({   id,
+                          name: getSpEvent.name ,
                           manager: getSpEvent.manager,
                           people: getSpEvent.people,
                           time: getSpEvent.time,                          
                         })
-      // setCheckDay()
-      // setCheckDays(getSpEvent)      
+      setValue('name',getSpEvent.name)
+      setValue('manager',getSpEvent.manager)
+      setValue('people',getSpEvent.people)
+      setValue('time',getSpEvent.time)                        
     }
+
+    // イベントの新規登録か更新かの判断、定期イベントか特殊イベントかの判断 //
+    useEffect(()=>{        
+          
+      if(id){
+        if(id.length > 37){
+          serchSubEvent(id)
+        }else if(id.length > 35){
+          serchSpEvent(id)
+        }else{
+          setEventState(id)
+          setNewRegiState(true)  
+        }      
+      }
+    },[id])
 
     return (
       <div>        
@@ -221,7 +289,6 @@ const SubEventRegister = () => {
                 label="タイトル"
                 placeholder="タイトル"
                 margin="normal"
-                value={defaultSubEvent.name}
                 {...register("name", {required: true, maxLength: 50})}
               />
               {errors.name && <span className={classes.error}>タイトルを入力してください</span>}
@@ -230,8 +297,7 @@ const SubEventRegister = () => {
                 id="manager"              
                 label="担当者"
                 placeholder="担当者"
-                margin="normal"
-                value={defaultSubEvent.manager}
+                margin="normal"                
                 {...register("manager", {required: true, maxLength: 20})}
               />
               {errors.manager && <span className={classes.error}>担当者を入力してください</span>}
@@ -241,8 +307,7 @@ const SubEventRegister = () => {
                 type="number"
                 label="最大人数"
                 placeholder="最大人数"
-                margin="normal"
-                value={defaultSubEvent.people}
+                margin="normal"                
                 {...register("people", {required: true, min: 1, max:1000 })}
               />
               {errors.manager && <span className={classes.error}>担当者を入力してください</span>}
@@ -252,8 +317,7 @@ const SubEventRegister = () => {
                 type="number"
                 label="所要時間（分）"
                 placeholder="所要時間（分）"
-                margin="normal"
-                value={defaultSubEvent.time}
+                margin="normal"                
                 {...register("time", {required: true, min: 1, max: 1000 })}
               />
               {errors.time && <span className={classes.error}>時間を正しく入力してください(1 ~ 1000)</span>}
@@ -332,7 +396,7 @@ const SubEventRegister = () => {
               className={classes.loginBtn}
               type="submit"
             >
-            イベント登録
+            { newRegiState ? "イベント登録" : "イベント更新"}
             </Button>
           </CardActions>
         </Card>
