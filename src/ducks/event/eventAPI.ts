@@ -40,8 +40,8 @@ export async function fetchSubEventsAPI() {
   return apiData
 }
 
-export async function createSubEventAPI(data: crudSubEventType) {  
-  const apiData = await API.graphql({ query: createSubEvent, variables: { input: data } });    
+export async function createSubEventAPI(input: crudSubEventType) {  
+  const apiData = await API.graphql({ query: createSubEvent, variables: { input } });    
   return apiData
 }
 
@@ -55,8 +55,10 @@ export async function fetchSpEventsAPI() {
   return apiData
 }  
 
-export async function createSpEventAPI(data: crudSpEventType) {  
-  const apiData = await API.graphql({ query: createSpEvent, variables: { input: data } });    
+export async function createSpEventAPI(input: crudSpEventType) {  
+  let apiData;
+  try { apiData = await API.graphql({ query: createSpEvent, variables: { input } });    
+  } catch(err){console.log(err)}
   return apiData
 }
 
@@ -112,7 +114,7 @@ export async function fetchAllUserEventAPI() {
     
     return a
   })
-  
+    
   return getEventReserve
   
 }    

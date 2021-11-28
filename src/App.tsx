@@ -20,6 +20,7 @@ import {
   fetchSubEventAsync,
   fetchSpEventAsync,
   fetchDelEventAsync,
+  fetchAllUserEventAsync
 } from './ducks/event/eventSlice';
 import { fetchAllUserEventAPI } from './ducks/event/eventAPI'
 import {  
@@ -44,8 +45,9 @@ function App() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  useEffect(() => {
+  useEffect(() => {    
     dispatch(fetchUserAsync())
+    dispatch(fetchAllUserEventAsync())
     dispatch(fetchSubEventAsync())
     dispatch(fetchSpEventAsync())
     dispatch(fetchDelEventAsync())
@@ -81,7 +83,7 @@ function App() {
   return (
     <div className="App">
       { state.user.user_name !== "" && 
-      <h2>ようこそ！ {state.user.user_name}さん({state.user.user_group.includes("admin") && "＊管理者＊"})
+      <h2>ようこそ！ {state.user.user_name}さん{state.user.user_group.includes("admin") && "(＊管理者＊)"}
       </h2>}
       {state.user.user_group.includes("admin") && 
       <span>

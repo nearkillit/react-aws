@@ -38,6 +38,6 @@ type SubEvent
 
 type DelEvent @model {
   id: ID!
-  day: AWSDate!
+  day: AWSDateTime!
   sub_event_id: String!
 }

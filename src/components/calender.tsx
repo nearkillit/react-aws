@@ -33,10 +33,11 @@ const Calender = () => {
     const isFirstRender = useRef(false)    
 
     const handleDateClick = useCallback((arg: DateClickArg) => {        
-        navigate(`/subeventregi/${arg.dateStr}`)
+        // navigate(`/subeventregi/${arg.dateStr}`)
       }, []);
     
       const handleEventClick = useCallback((arg: EventClickArg) => {
+
         if(state.user.user_group.includes("admin")){
           navigate(`/subeventregi/${arg.event._def.publicId}`)
         }else{
@@ -49,29 +50,18 @@ const Calender = () => {
       const thisDate = getDate.getDate() < 10 ? "0" + String(getDate.getDate()) : String(getDate.getDate())
       return `${getDate.getFullYear()}-${thisMonth}-${thisDate}T${getStart}`
     }    
-    
-    useEffect(() => {             
+
+    useEffect(() => {                  
       isFirstRender.current = true      
     }, [])
 
-    // useEffect(()=>{            
-    //   if(isFirstRender.current) { // 初回レンダー判定
-    //     isFirstRender.current = false
-    //     setSubEvent(stateSubEvent)
-    //   }
-    // },[stateSubEvent])
+    useEffect(() => {
 
-    // useEffect(()=>{                  
-    //   setSubEvent(stateSubEvent)
-    //   setEventCheck({...eventsCheck, sub:true})
-    // },[stateSubEvent])
-
-    useEffect(() => {                        
       if(state.event.del_event_status === "completed" && 
          state.event.sub_event_status === "completed" && 
          state.event.sp_event_status === "completed" && 
          isFirstRender.current ){
-      
+                    
         isFirstRender.current = false
         const newSubEvent: Array<calenderEventsType> = []                    
         
@@ -88,9 +78,14 @@ const Calender = () => {
               const mm = ( date.getMonth() + 1 ) < 10 ? "0" + String( date.getMonth() + 1 ) : String( date.getMonth() + 1 )
               const dd = ( date.getDate() ) < 10 ? "0" + String( date.getDate() ) : String( date.getDate() )
               const yyyymmdd = `${date.getFullYear()}-${mm}-${dd}`
-              if(stateDelEvent.filter(de => de.sub_event_id === e.id && de.day === yyyymmdd).length < 1){
+              const yyyymmddhhmmss = `${yyyymmdd}T${d.start_time}Z`
+
+              if(stateDelEvent.filter(de => de.sub_event_id === e.id && de.day === yyyymmddhhmmss).length < 1){
                 const nSEID = e.id + d.dow + thisCalenderDay(date, d.start_time)
-                newSubEvent.push({ id: nSEID, title: e.name, date: thisCalenderDay(date, d.start_time) })  
+                // 予約人数                                
+                const resPpl = state.event.reserve_event.filter(re=>re.event_id===nSEID)[0]
+                const titleAddReserve = `${e.name} ${resPpl ? resPpl.event_people : 0}/${e.people}`
+                newSubEvent.push({ id: nSEID, title: titleAddReserve, date: thisCalenderDay(date, d.start_time) })  
               }              
               date.setDate(date.getDate() + 7)
             }          
@@ -100,23 +95,21 @@ const Calender = () => {
         })
 
         const addSpEvent = stateSpEvent.map(se => {
-          let seObj = { id: se.id, title: se.name, date: se.start.substring(0,se.start.length-1)}
+          // 予約人数                                
+          const resPpl = state.event.reserve_event.filter(re=>re.event_id===se.id)[0]
+          const titleAddReserve = `${se.name} ${resPpl ? resPpl.event_people : 0}/${se.people}`
+          let seObj = { id: se.id, title: titleAddReserve, date: se.start.substring(0,se.start.length-1)}          
           return seObj
         })              
         
-        const joinSubSpEvent = addSpEvent.concat(newSubEvent)            
+        const joinSubSpEvent = addSpEvent.concat(newSubEvent)        
         setEvents(joinSubSpEvent)
       } 
     },[state.event])
 
-
-    function confirmEvents(){
-      // <button onClick={confirmEvents}>confirmEvents</button>
-      console.log(events);      
-    }
-
     return (        
-        <div>          
+        <div>
+          <button onClick={()=>console.log(events)}>events</button>
             <FullCalendar 
           locale="ja"
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}

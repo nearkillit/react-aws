@@ -8,7 +8,7 @@ export type userState = {
   user: userType,
   user_id: string,
   user_name: string,
-  user_status: 'idle' | 'loading' | 'failed',
+  user_status: 'idle' | 'loading' | 'failed' | 'complited',
   user_group: string[]
 }
 
@@ -73,7 +73,7 @@ export const userSlice = createSlice({
       .addCase(fetchUserDataAsync.fulfilled, (state, action:any) => {
         state.user.event_id = action.payload.data.getUser.event_id
         state.user.updatedAt = action.payload.data.getUser.updatedAt        
-        state.user_status = 'idle';
+        state.user_status = 'complited';
       })
       .addCase(fetchUserAsync.pending, (state) => {
         state.user_status = 'loading';
@@ -81,17 +81,15 @@ export const userSlice = createSlice({
       .addCase(fetchUserAsync.fulfilled, (state, action:any) => {        
         state.user_id = action.payload.user_id
         state.user_name = action.payload.user_name
-        state.user_status = 'idle';
+        state.user_status = 'complited';
         state.user_group = action.payload.user_group
       })
       .addCase(updateUserAsync.pending, (state) => {
         state.user_status = 'loading';
       })
       .addCase(updateUserAsync.fulfilled, (state, action:any) => {        
-        // state = action.payload
-        console.log("user update ");        
-        console.log(action);
-        
+        state.user.event_id = action.payload.data.updateUser.event_id  
+        state.user_status = 'complited';
       })
   },
 });

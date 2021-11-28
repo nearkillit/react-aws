@@ -1,3 +1,17 @@
+// const intialEventState: subEventType = {
+//   id: "test",
+//   name: "テストイベント",
+//   time: 60,
+//   manager: "テスト担当者",
+//   color: "#FFF",
+//   people: 20,
+//   days: [
+//     { start_time: "18:00:00.000", dow: 1},
+//     { start_time: "19:00:00.000", dow: 3},
+//     { start_time: "17:30:00.000", dow: 5},
+//   ],
+//   updatedAt: "2021-11-18T23:24:52.785Z"
+// }
 
 ########  function ########
 

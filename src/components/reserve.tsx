@@ -5,11 +5,14 @@ import {
     } from "react-router-dom";    
 // component
 import {  
-  selectState as eventState,  
+  selectState as eventState,
+  fetchAllUserEventAsync  
 } from '../ducks/event/eventSlice';
+import { fetchAllUserEventAPI } from '../ducks/event/eventAPI'
 import {  
     updateUserAsync
   } from '../ducks/user/userSlice';
+  
 import { useAppSelector, useAppDispatch } from '../app/hooks';
 
 interface eventDetailType {
@@ -27,7 +30,9 @@ const Reserve = () => {
     const { id } = useParams<string>();
     const [ eventDetail, setEventDetail ] = useState<eventDetailType>() 
     const [ eventArrayNumber, serEventArrayNumber ] = useState<number>(-1) // なんかあとで使うかも
-    const [ eventReserved, setEventReserved] = useState<Boolean>(false)
+    const [ eventReserved, setEventReserved ] = useState<Boolean>(false)
+    const [ reservePeople, setReservePeople ] = useState<number>(0)
+    const [ disableReserve, setDisableReserve ] = useState<boolean>(false)
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
 
@@ -92,27 +97,63 @@ const Reserve = () => {
         return `${hoursStr}:${minutesStr}`
     }
 
-    function addReserve(){
+    async function addReserve(){
       let newEventId = state.user.user.event_id.slice()
       id && newEventId.push(id)
 
       const input = { id: state.user.user_id, 
                       event_id: newEventId
-                    }  
-      dispatch(updateUserAsync(input))
-      setEventReserved(true)
+                    }
+      const rLC = await reserveLimitCheck()
+      
+      if(rLC){
+        await dispatch(updateUserAsync(input))
+        await dispatch(fetchAllUserEventAsync())
+        setEventReserved(true)
+      }                          
     }
 
-    function deleteReserve(){
+    async function deleteReserve(){
       let newEventId = state.user.user.event_id.slice()
       newEventId = id ? newEventId.filter(nei => nei !== id) : newEventId
   
       const input = { id: state.user.user_id, 
                         event_id: newEventId
                       }  
-      dispatch(updateUserAsync(input))
+      await dispatch(updateUserAsync(input))
+      await dispatch(fetchAllUserEventAsync())
       setEventReserved(false)
     }
+
+    async function reserveLimitCheck(){
+      await dispatch(fetchAllUserEventAsync())
+      const getReserveDate = await fetchAllUserEventAPI()
+      const resPpl = getReserveDate.filter(re=>re.event_id===id)[0]
+      if(resPpl && eventDetail){
+        if(resPpl.event_people >= eventDetail.people){
+          alert("予約がいっぱいです。") 
+          return false
+        }      
+      }
+      return true
+    }
+
+    useEffect(()=>{        
+      
+      if(eventDetail && reservePeople >= eventDetail.people){
+        setDisableReserve(true)
+      }else{
+        setDisableReserve(false)
+      }
+    },[reservePeople])
+
+    useEffect(()=>{      
+      
+      if(id){
+        const resPpl = state.event.reserve_event.filter(re=>re.event_id===id)[0]
+        setReservePeople(resPpl ? resPpl.event_people : 0)
+      }      
+    },[state.event.reserve_event])
 
     useEffect(()=>{
       if(id){
@@ -133,13 +174,17 @@ const Reserve = () => {
       }
     },[state.user.user.event_id])
 
+    // 人数チェック
+
     return (
         <div>
           {eventDetail ?
-            <div>                
+            <div>     
+              <button onClick={reserveLimitCheck}>check</button>
               <p>イベント名：{eventDetail.name}</p>
               <p>担当者：{eventDetail.manager}　先生</p>              
               <p>最大人数：{eventDetail.people}人</p>
+              <p>予約人数：{reservePeople}/{eventDetail.people}人</p>
               <p>日程：{eventDetail.date} ({getDOW(new Date(eventDetail.date))}曜日)</p>
               <p>時間：{eventDetail.time.substring(0,5)} ~ {getEndTime(eventDetail.time, eventDetail.timeReq)}</p>
               { eventReserved ? 
@@ -147,8 +192,11 @@ const Reserve = () => {
                   <span>予約済み</span>
                   <button onClick={deleteReserve}>予約を取り消す</button>
                 </div>
-                :    
-                <button onClick={addReserve}>予約する</button>
+                :
+                <div>    
+                  <button onClick={addReserve} disabled={disableReserve as boolean}>予約する</button>
+                  {disableReserve && <p>予約人数がいっぱいです</p>}
+                </div>
               }
             
             </div>

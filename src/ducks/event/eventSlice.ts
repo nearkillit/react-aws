@@ -13,9 +13,14 @@ import { fetchSubEventsAPI,
          crudSubEventType,
          crudSpEventType,
          crudDelEventType,
+         fetchAllUserEventAPI
         } from "./eventAPI"
 
 //////// state ////////
+interface reserveEventType {
+  event_id: string,
+  event_people: number,
+}
 export type eventState = {
   sub_event: Array<subEventType>,
   sub_event_status: 'idle' | 'loading' | 'failed' | 'completed' ,
@@ -23,6 +28,7 @@ export type eventState = {
   sp_event_status: 'idle' | 'loading' | 'failed' | 'completed',
   del_event: Array<delEventType>,
   del_event_status: 'idle' | 'loading' | 'failed' | 'completed',
+  reserve_event: Array<reserveEventType>
 }
 
 const initialState: eventState = {
@@ -31,25 +37,19 @@ const initialState: eventState = {
   sp_event: [],
   sp_event_status: "idle",
   del_event: [],
-  del_event_status: "idle"
+  del_event_status: "idle",
+  reserve_event: []
 };
 
-const intialEventState: subEventType = {
-  id: "test",
-  name: "テストイベント",
-  time: 60,
-  manager: "テスト担当者",
-  color: "#FFF",
-  people: 20,
-  days: [
-    { start_time: "18:00:00.000", dow: 1},
-    { start_time: "19:00:00.000", dow: 3},
-    { start_time: "17:30:00.000", dow: 5},
-  ],
-  updatedAt: "2021-11-18T23:24:52.785Z"
-}
+//////// AsyncThunk ////////
+export const fetchAllUserEventAsync = createAsyncThunk(
+  'event/fetchAllUserEvent',
+  async () => {            
+    const response = await fetchAllUserEventAPI();            
+    return response;
+  }
+);
 
-//////// AsyncThunk //////// 
 export const fetchSubEventAsync = createAsyncThunk(
     'event/fetchSubEvent',
     async () => {            
@@ -130,32 +130,31 @@ export const eventSlice = createSlice({
     // increment: (state) => {      
     //   state.value += 1;
     // },
-    // decrement: (state) => {
-    //   state.value -= 1;
-    // },    
-    // incrementByAmount: (state, action: PayloadAction<number>) => {
-    //   state.value += action.payload;
-    // },
   },  
   extraReducers: (builder) => {
     builder
+      .addCase(fetchAllUserEventAsync.fulfilled, (state, action:any) => {
+        state.reserve_event = action.payload
+      })
       .addCase(fetchSubEventAsync.pending, (state) => {
         state.sub_event_status = 'loading';
       })
       .addCase(fetchSubEventAsync.fulfilled, (state, action:any) => {
         state.sub_event = action.payload.data.listSubEvents.items
         state.sub_event_status = 'completed';
-      })//state change
+      })
       .addCase(createSubEventAsync.pending, (state) => {
         state.sub_event_status = 'loading';
-      })//state change
-      .addCase(createSubEventAsync.fulfilled, (state, action:any) => {
-        console.log(action.payload);        
+      })
+      .addCase(createSubEventAsync.fulfilled, (state, action:any) => {        
+        state.sub_event.push(action.payload.data.createSubEvent) 
+        state.sub_event_status = 'completed';      
       })
       .addCase(updateSubEventAsync.pending, (state) => {
         state.sub_event_status = 'loading';
       })
-      .addCase(updateSubEventAsync.fulfilled, (state, action:any) => {        
+      .addCase(updateSubEventAsync.fulfilled, (state, action:any) => {    
+        state.sub_event_status = 'completed';    
         state.sub_event = state.sub_event.map(se=>{
           if(se.id === action.payload.data.updateSubEvent.id){
             return action.payload.data.updateSubEvent
@@ -170,18 +169,26 @@ export const eventSlice = createSlice({
       .addCase(fetchSpEventAsync.fulfilled, (state, action:any) => {
         state.sp_event = action.payload.data.listSpEvents.items
         state.sp_event_status = 'completed';   
-      })//state change
+      })
       .addCase(createSpEventAsync.pending, (state) => {
         state.sp_event_status = 'loading';
-      })//state change
-      .addCase(createSpEventAsync.fulfilled, (state, action:any) => {
-        console.log(action.payload);        
-      })//state change
+      })
+      .addCase(createSpEventAsync.fulfilled, (state, action:any) => {        
+        state.sp_event.push(action.payload.data.createSpEvent)
+        state.sp_event_status = 'completed';
+      })
       .addCase(updateSpEventAsync.pending, (state) => {
         state.sp_event_status = 'loading';
-      })//state change
-      .addCase(updateSpEventAsync.fulfilled, (state, action:any) => {
-        console.log(action.payload);        
+      })
+      .addCase(updateSpEventAsync.fulfilled, (state, action:any) => {        
+        state.sp_event_status = 'completed';
+        state.sp_event = state.sp_event.map(se=>{
+          if(se.id === action.payload.data.updateSpEvent.id){
+            return action.payload.data.updateSpEvent
+          }else{
+            return se
+          }           
+        })        
       })
       .addCase(fetchDelEventAsync.pending, (state) => {
         state.sp_event_status = 'loading';

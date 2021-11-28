@@ -142,20 +142,19 @@ const SubEventRegister = () => {
     // サブミット
     const onSubmit = async (data: submitEventType) => {      
       if(checkDays.length > 1 ){
-        if(checkEqualDays()){
+        if(checkDuplicateDaysSameEvent()){
           alert("同じ日付のイベントがあります")
           return
         }        
-      }
-      newRegiState ? alert("イベントを追加しました") : alert("イベントを更新しました")      
+      }                     
+
       const newDatetime = checkDays.map(cD => {
         const cDHour = cD.hour < 10 ? `0${cD.hour}` : String(cD.hour)
         const cDMinute = cD.minute < 10 ? `0${cD.minute}` : String(cD.minute)
         return { dow: cD.dow, start_time: `${cDHour}:${cDMinute}:00.000` }
       })
       
-      // 重複チェックする！！！！
-      // 重複の前に、それぞれのAsyncのチェック
+      // 重複チェックする！！！！      
 
       if(eventState === "sub"){
 
@@ -173,7 +172,12 @@ const SubEventRegister = () => {
           addData.id = defaultEvent.id
           dispatch(updateSubEventAsync(addData))
         }
-      }else if(eventState === "sp"){                
+      }else if(eventState === "sp"){          
+        // 日付が今日以降かどうか
+        if(!checkDay || !checkTodayAfter(checkDay as Date)){ 
+          alert("今日以降の日付を入力してください") 
+          return
+        }         
 
         const addData: crudSpEventType = 
                       { name: data.name, 
@@ -185,6 +189,7 @@ const SubEventRegister = () => {
                       }
 
         if(newRegiState){
+          console.log(addData);          
           dispatch(createSpEventAsync(addData))
         }else{
           addData.id = defaultEvent.id
@@ -192,6 +197,7 @@ const SubEventRegister = () => {
         }
       }      
 
+      newRegiState ? alert("イベントを追加しました") : alert("イベントを更新しました")
       navigate(`/`)        
     }
     
@@ -199,16 +205,41 @@ const SubEventRegister = () => {
     function convertDateintoAWSDateTime(getDate: Date){
       const YYYY = getDate.getFullYear()
       const MM = ( getDate.getMonth() + 1 ) < 10 ? `0${getDate.getMonth() + 1}` : (getDate.getMonth() + 1)
-      const DD = getDate.getDay() < 10 ? `0${getDate.getDay()}` : getDate.getDay()
+      const DD = getDate.getDate() < 10 ? `0${getDate.getDate()}` : getDate.getDate()
       const hh = getDate.getHours() < 10 ? `0${getDate.getHours()}` : getDate.getHours()
       const mm = getDate.getMinutes() < 10 ? `0${getDate.getMinutes()}` : getDate.getMinutes()
       const ss = getDate.getSeconds() < 10 ? `0${getDate.getSeconds()}` : getDate.getSeconds()
-      return `${YYYY}-${MM}-${DD}T${hh}-${mm}-${ss}.000Z`
+      return `${YYYY}-${MM}-${DD}T${hh}:${mm}:${ss}.000Z`
     }
+    // 日付か今日以降かどうか
+    function checkTodayAfter(getDate: Date){      
+      
+      const today = new Date()
+      // YYYY
+      if(today.getFullYear() < getDate.getFullYear()) return true
+      else if(today.getFullYear() > getDate.getFullYear()) return false
+      else{
+        console.log("mm");
+        // MM
+        if(today.getMonth() < getDate.getMonth()) return true
+        else if(today.getMonth() > getDate.getMonth()) return false
+        else{
+          console.log("dd");
+          // DD
+          if(today.getDate() < getDate.getDate()) return true
+          else if(today.getDate() >= getDate.getDate()) return false          
+        }
+      }
 
-
+    }
+  
+  // 重複チェック
+    // 違うイベントでの日時の重複チェック // ⇨　別に重複しててもいい（違う会議室的な）
+    // function checkDuplicateDaysDifferentEvent(){
+      
+    // }
     // 同一イベントで日時の重複チェック //
-    function checkEqualDays() {      
+    function checkDuplicateDaysSameEvent() {      
       const checkCheckDays = checkDays.map(cd => `${cd.dow}${cd.hour < 10 ? "0" + String(cd.hour) : String(cd.hour)}${cd.minute < 10 ? "0" + String(cd.minute) : String(cd.minute)}`)
       return existsSameValue(checkCheckDays)
     }
@@ -241,7 +272,7 @@ const SubEventRegister = () => {
       setValue('manager',getSubEvent.manager)
       setValue('people',getSubEvent.people)
       setValue('time',getSubEvent.time)
-      setCheckDays(getSubEventDay)      
+      setCheckDays(getSubEventDay)
     }
 
     function serchSpEvent(id: string) {
@@ -257,7 +288,9 @@ const SubEventRegister = () => {
       setValue('name',getSpEvent.name)
       setValue('manager',getSpEvent.manager)
       setValue('people',getSpEvent.people)
-      setValue('time',getSpEvent.time)                        
+      setValue('time',getSpEvent.time)
+      const startDate = new Date(getSpEvent.start)      
+      setCheckDay(startDate)                        
     }
 
     // イベントの新規登録か更新かの判断、定期イベントか特殊イベントかの判断 //
