@@ -14,13 +14,15 @@ import FullCalendar, { EventClickArg } from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid"; 
 import timeGridPlugin from '@fullcalendar/timegrid';  
 import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
+import './calender.css'
 // types
 import { subEventType, spEventType, delEventType } from "../types/apidata"
 
 interface calenderEventsType {
   id: string,
   title: string,
-  date: string
+  date: string,
+  color?: string
 }
 
 const Calender = () => {
@@ -28,7 +30,7 @@ const Calender = () => {
     const stateSubEvent = useAppSelector(selectSubEvent)
     const stateSpEvent = useAppSelector(selectSpEvent)
     const stateDelEvent = useAppSelector(selectDelEvent)
-    const [events, setEvents] = useState<calenderEventsType[]>([])        
+    const [ events, setEvents ] = useState<calenderEventsType[]>([])    
     const navigate = useNavigate();
     const isFirstRender = useRef(false)    
 
@@ -36,21 +38,21 @@ const Calender = () => {
         // navigate(`/subeventregi/${arg.dateStr}`)
       }, []);
     
-      const handleEventClick = useCallback((arg: EventClickArg) => {
-
+      const handleEventClick = useCallback((arg: EventClickArg) => {                
+        
         if(state.user.user_group.includes("admin")){
           navigate(`/subeventregi/${arg.event._def.publicId}`)
         }else{
           navigate(`/reserve/${arg.event._def.publicId}`)        
         }        
-      }, []); 
+      }, [state.user.user_group]); 
     
     const thisCalenderDay = (getDate: Date, getStart: string) => {
       const thisMonth = (getDate.getMonth() + 1) < 10 ? "0" + String(getDate.getMonth() + 1) : String(getDate.getMonth() + 1)
       const thisDate = getDate.getDate() < 10 ? "0" + String(getDate.getDate()) : String(getDate.getDate())
       return `${getDate.getFullYear()}-${thisMonth}-${thisDate}T${getStart}`
     }    
-
+    
     useEffect(() => {                  
       isFirstRender.current = true      
     }, [])
@@ -85,7 +87,7 @@ const Calender = () => {
                 // 予約人数                                
                 const resPpl = state.event.reserve_event.filter(re=>re.event_id===nSEID)[0]
                 const titleAddReserve = `${e.name} ${resPpl ? resPpl.event_people : 0}/${e.people}`
-                newSubEvent.push({ id: nSEID, title: titleAddReserve, date: thisCalenderDay(date, d.start_time) })  
+                newSubEvent.push({ id: nSEID, title: titleAddReserve, date: thisCalenderDay(date, d.start_time)})  
               }              
               date.setDate(date.getDate() + 7)
             }          
@@ -108,18 +110,17 @@ const Calender = () => {
     },[state.event])
 
     return (        
-        <div>
-          <button onClick={()=>console.log(events)}>events</button>
+        <div>          
             <FullCalendar 
-          locale="ja"
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          dateClick={handleDateClick}
-          eventClick={handleEventClick}
-          events={events}      
-          headerToolbar={{
-            center: 'dayGridMonth,timeGridWeek,timeGridDay',
-          }}    
-        />        
+              locale="ja"
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+              dateClick={handleDateClick}
+              eventClick={handleEventClick}
+              events={events}      
+              headerToolbar={{
+                center: 'dayGridMonth,timeGridWeek,timeGridDay',
+              }}    
+            />        
         </div>        
     )
 }

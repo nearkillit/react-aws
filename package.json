@@ -34,6 +34,7 @@
     "luxon": "^2.1.1",
     "moment": "^2.29.1",
     "react": "^17.0.2",
+    "react-color": "^2.19.3",
     "react-dom": "^17.0.2",
     "react-hook-form": "^7.20.2",
     "react-redux": "^7.2.6",
@@ -70,6 +71,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-color": "^3.0.6",
     "@types/react-router-dom": "^5.3.2"
   }
 }

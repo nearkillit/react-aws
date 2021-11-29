@@ -10,6 +10,7 @@ import { selectState,
          updateSubEventAsync,
          createSpEventAsync,
          updateSpEventAsync,
+         deleteSpEventAsync,
          createDelEventAsync,
          updateDelEventAsync, } from '../ducks/event/eventSlice';
 import { crudSubEventType, crudSpEventType, subEventDays } from '../ducks/event/eventAPI'
@@ -75,6 +76,7 @@ interface submitEventType {
   manager: string,  
   people: number,  
   time: number,
+  place: string,
   days?: subEventDays[]
 }
 
@@ -94,6 +96,7 @@ const initialCheckDays = {
 const initialDefaultEvent = {
   name: "",  
   manager: "",  
+  place: "",
   people: 1,  
   time: 0,  
 }
@@ -138,8 +141,17 @@ const SubEventRegister = () => {
       setCheckDays(newCheckDays)      
     }
 
+    // イベントの削除 //
+    function deleteEvent(){
+      let res = window.confirm("このイベントを削除しても大丈夫ですか？")
+      if(res && eventState === "sp"){
+        id && dispatch(deleteSpEventAsync(id))
+        alert('削除しました')
+        navigate('/')
+      }      
+    }
 
-    // サブミット
+    // サブミット //
     const onSubmit = async (data: submitEventType) => {      
       if(checkDays.length > 1 ){
         if(checkDuplicateDaysSameEvent()){
@@ -164,7 +176,8 @@ const SubEventRegister = () => {
                         people: Number(data.people),
                         time: Number(data.time),
                         color: "#fff",
-                        days: newDatetime
+                        days: newDatetime,
+                        place: data.place              
                       }      
         if(newRegiState){
           dispatch(createSubEventAsync(addData))
@@ -185,6 +198,7 @@ const SubEventRegister = () => {
                         people: Number(data.people),
                         time: Number(data.time),
                         color: "#fff",
+                        place: data.place,
                         start: convertDateintoAWSDateTime(checkDay as Date)
                       }
 
@@ -266,12 +280,14 @@ const SubEventRegister = () => {
                           name: getSubEvent.name ,
                           manager: getSubEvent.manager,
                           people: getSubEvent.people,
-                          time: getSubEvent.time,                          
+                          time: getSubEvent.time,   
+                          place: getSubEvent.place,
                           })
       setValue('name',getSubEvent.name)
       setValue('manager',getSubEvent.manager)
       setValue('people',getSubEvent.people)
       setValue('time',getSubEvent.time)
+      setValue('place',getSubEvent.place)
       setCheckDays(getSubEventDay)
     }
 
@@ -283,12 +299,14 @@ const SubEventRegister = () => {
                           name: getSpEvent.name ,
                           manager: getSpEvent.manager,
                           people: getSpEvent.people,
-                          time: getSpEvent.time,                          
+                          time: getSpEvent.time,
+                          place: getSpEvent.place                          
                         })
       setValue('name',getSpEvent.name)
       setValue('manager',getSpEvent.manager)
       setValue('people',getSpEvent.people)
       setValue('time',getSpEvent.time)
+      setValue('place',getSpEvent.place)
       const startDate = new Date(getSpEvent.start)      
       setCheckDay(startDate)                        
     }
@@ -353,7 +371,15 @@ const SubEventRegister = () => {
                 margin="normal"                
                 {...register("time", {required: true, min: 1, max: 1000 })}
               />
-              {errors.time && <span className={classes.error}>時間を正しく入力してください(1 ~ 1000)</span>}
+              <TextField
+                fullWidth
+                id="place"                              
+                label="場所"
+                placeholder="場所"
+                margin="normal"                
+                {...register("place", {required: true, maxLength: 100})}
+              />
+              {errors.time && <span className={classes.error}>所要時間を正しく入力してください(1 ~ 1000)</span>}
               <Box sx={{ minWidth: 120 }}>
                 { eventState === "sub" && 
                 checkDays.map((cd,index)=>(
@@ -430,10 +456,21 @@ const SubEventRegister = () => {
               type="submit"
             >
             { newRegiState ? "イベント登録" : "イベント更新"}
-            </Button>
-          </CardActions>
+            </Button>            
+          </CardActions>          
         </Card>
       </form>
+      { !newRegiState && eventState === "sp" && 
+              <Button
+                variant="contained"
+                size="large"              
+                className={classes.loginBtn}
+                type="submit"
+                color="error"
+                onClick={deleteEvent}
+              >
+              イベントの削除
+              </Button>}
     </div>
     )
 }

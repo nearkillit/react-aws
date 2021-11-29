@@ -10,6 +10,7 @@ import { fetchSubEventsAPI,
          updateSubEventAPI,
          updateSpEventAPI,
          updateDelEventAPI,
+         deleteSpEventAPI,
          crudSubEventType,
          crudSpEventType,
          crudDelEventType,
@@ -98,6 +99,14 @@ export const updateSpEventAsync = createAsyncThunk(
     }
   );
 
+export const deleteSpEventAsync = createAsyncThunk(
+    'event/deleteSpEvent',
+    async (data: string) => {            
+      const response = await deleteSpEventAPI(data);
+      return response;
+    }
+  );
+  
 export const fetchDelEventAsync = createAsyncThunk(
     'event/fetchDelEvent',
     async () => {            
@@ -189,6 +198,13 @@ export const eventSlice = createSlice({
             return se
           }           
         })        
+      })
+      .addCase(deleteSpEventAsync.pending, (state) => {
+        state.sp_event_status = 'loading';
+      })
+      .addCase(deleteSpEventAsync.fulfilled, (state, action:any) => {
+        state.sp_event = state.sp_event.filter(se => se.id !== action.payload.data.deleteSpEvent.id)
+        state.sp_event_status = 'completed';
       })
       .addCase(fetchDelEventAsync.pending, (state) => {
         state.sp_event_status = 'loading';

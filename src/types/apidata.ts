@@ -11,6 +11,7 @@ export type subEventType = {
   manager: string,
   color: string,
   people: number,
+  place: string,
   days: Array<subEventDays>,
   updatedAt: string
 }
@@ -22,6 +23,7 @@ export type spEventType = {
   manager: string,
   color: string,
   people: number,
+  place: string,
   start: string,
   updatedAt: string
 }

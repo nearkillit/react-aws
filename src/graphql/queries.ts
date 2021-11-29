@@ -41,7 +41,7 @@ export const listUsersId = /* GraphQL */ `
     listUsers(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id        
-        event_id                
+        event_id        
       }
       nextToken
     }
@@ -56,6 +56,7 @@ export const getSpEvent = /* GraphQL */ `
       manager
       color
       people
+      place
       start
       createdAt
       updatedAt
@@ -76,6 +77,7 @@ export const listSpEvents = /* GraphQL */ `
         manager
         color
         people
+        place
         start
         createdAt
         updatedAt
@@ -93,6 +95,7 @@ export const getSubEvent = /* GraphQL */ `
       manager
       color
       people
+      place
       days {
         start_time
         dow
@@ -116,6 +119,7 @@ export const listSubEvents = /* GraphQL */ `
         manager
         color
         people
+        place
         days {
           start_time
           dow

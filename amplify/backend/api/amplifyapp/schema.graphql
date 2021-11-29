@@ -12,6 +12,7 @@ type SpEvent @model {
   manager: String!
   color: String!
   people: Int!
+  place: String!
   start: AWSDateTime!
 }
 
@@ -33,6 +34,7 @@ type SubEvent
   manager: String!
   color: String!
   people: Int!
+  place: String!
   days: [days]
 }
 

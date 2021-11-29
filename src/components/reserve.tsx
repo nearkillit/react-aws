@@ -14,6 +14,8 @@ import {
   } from '../ducks/user/userSlice';
   
 import { useAppSelector, useAppDispatch } from '../app/hooks';
+// color pallet
+import { CirclePicker } from 'react-color';
 
 interface eventDetailType {
   id: string,
@@ -84,11 +86,11 @@ const Reserve = () => {
         var dayOfWeek = date.getDay() ;	// 曜日(数値)
         var dayOfWeekStr = [ "日", "月", "火", "水", "木", "金", "土" ][dayOfWeek]
         return dayOfWeekStr
-    }
+    }    
 
     function getEndTime(start: string, timereq: string){
-        // hh:mm:ss:sss の前提
-        let hours = Number(start.substring(0,2)) + Number(timereq) / 60
+        // hh:mm:ss:sss の前提        
+        let hours = Number(start.substring(0,2)) + Math.floor(Number(timereq) / 60)
         let minutes = Number(start.substring(3,5)) + Number(timereq) % 60
         // 0 つける
         let hoursStr = hours / 10 < 1 ? "0" + String(hours) : hours
@@ -96,6 +98,11 @@ const Reserve = () => {
 
         return `${hoursStr}:${minutesStr}`
     }
+
+    // color pallet
+    function colorChange(color: any, event:any){
+      console.log(color)
+    };
 
     async function addReserve(){
       let newEventId = state.user.user.event_id.slice()
@@ -182,11 +189,12 @@ const Reserve = () => {
             <div>     
               <button onClick={reserveLimitCheck}>check</button>
               <p>イベント名：{eventDetail.name}</p>
-              <p>担当者：{eventDetail.manager}　先生</p>              
+              <p>担当者：{eventDetail.manager}さん</p>              
               <p>最大人数：{eventDetail.people}人</p>
               <p>予約人数：{reservePeople}/{eventDetail.people}人</p>
               <p>日程：{eventDetail.date} ({getDOW(new Date(eventDetail.date))}曜日)</p>
-              <p>時間：{eventDetail.time.substring(0,5)} ~ {getEndTime(eventDetail.time, eventDetail.timeReq)}</p>
+              <p>時間：{eventDetail.time.substring(0,5)} ~ {getEndTime(eventDetail.time, eventDetail.timeReq)}（所要時間：{eventDetail.timeReq}分）</p>
+              <p><CirclePicker  onChange={colorChange}/></p>
               { eventReserved ? 
                 <div>                    
                   <span>予約済み</span>

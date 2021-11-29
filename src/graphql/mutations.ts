@@ -58,6 +58,7 @@ export const createSpEvent = /* GraphQL */ `
       manager
       color
       people
+      place
       start
       createdAt
       updatedAt
@@ -76,6 +77,7 @@ export const updateSpEvent = /* GraphQL */ `
       manager
       color
       people
+      place
       start
       createdAt
       updatedAt
@@ -94,6 +96,7 @@ export const deleteSpEvent = /* GraphQL */ `
       manager
       color
       people
+      place
       start
       createdAt
       updatedAt
@@ -112,6 +115,7 @@ export const createSubEvent = /* GraphQL */ `
       manager
       color
       people
+      place
       days {
         start_time
         dow
@@ -133,6 +137,7 @@ export const updateSubEvent = /* GraphQL */ `
       manager
       color
       people
+      place
       days {
         start_time
         dow
@@ -154,6 +159,7 @@ export const deleteSubEvent = /* GraphQL */ `
       manager
       color
       people
+      place
       days {
         start_time
         dow

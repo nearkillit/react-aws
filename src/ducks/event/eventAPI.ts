@@ -2,7 +2,7 @@
 import { API, graphqlOperation } from 'aws-amplify';
 // aws qraphQL
 import { listSubEvents, listSpEvents, listDelEvents, listUsersId } from '../../graphql/queries';
-import { createSpEvent, updateSpEvent, createSubEvent, updateSubEvent, createDelEvent, updateDelEvent } from '../../graphql/mutations'
+import { createSpEvent, updateSpEvent, deleteSpEvent, createSubEvent, updateSubEvent, createDelEvent, updateDelEvent } from '../../graphql/mutations'
 
 export type subEventDays = {
   start_time: string,
@@ -16,6 +16,7 @@ export type crudSubEventType = {
   manager: string,
   color: string,
   people: number,
+  place: string,
   days: Array<subEventDays>,  
 }
 
@@ -26,6 +27,7 @@ export type crudSpEventType = {
   manager: string,
   color: string,
   people: number,
+  place: string,
   start: string,  
 }
 
@@ -64,6 +66,13 @@ export async function createSpEventAPI(input: crudSpEventType) {
 
 export async function updateSpEventAPI(input: crudSpEventType ){
   const apiData = await API.graphql(graphqlOperation(updateSpEvent,{ input }))    
+  return apiData
+}
+
+export async function deleteSpEventAPI(id: string) {  
+  let apiData;
+  try { apiData = await API.graphql(graphqlOperation(deleteSpEvent, { input:{id} } ))
+  } catch(err){console.log(err)}
   return apiData
 }
 
