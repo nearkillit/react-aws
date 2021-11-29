@@ -12,6 +12,7 @@ export async function fetchUserDataAPI(id:string) {
 
 export async function fetchUserAPI() {
     const user = await Auth.currentAuthenticatedUser()     
+    console.log(user);
     
     const userGroups = user.signInUserSession.idToken.payload["cognito:groups"]
 
