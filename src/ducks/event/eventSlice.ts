@@ -142,7 +142,7 @@ export const eventSlice = createSlice({
   },  
   extraReducers: (builder) => {
     builder
-      .addCase(fetchAllUserEventAsync.fulfilled, (state, action:any) => {
+      .addCase(fetchAllUserEventAsync.fulfilled, (state, action:any) => {           
         state.reserve_event = action.payload
       })
       .addCase(fetchSubEventAsync.pending, (state) => {
