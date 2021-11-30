@@ -85,5 +85,10 @@ function App() {
   );
 }
 
-// export default App
-export default withAuthenticator(App);
+
+export default withAuthenticator(App, {
+  // @ts-ignore
+  signUpConfig: {
+    hiddenDefaults: ['phone_number']
+  }
+});
