@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import { useAppSelector, useAppDispatch } from './app/hooks';
 import { Routes, 
-         Route,               
+         Route,    
+         useNavigate           
          } from "react-router-dom";         
-import { useNavigate } from 'react-router-dom';
 // aws
 import { API, Auth, graphqlOperation, Storage } from 'aws-amplify';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
@@ -62,6 +62,7 @@ function App() {
   useEffect(()=>{
     state.user.user_id && dispatch(fetchUserDataAsync(state.user.user_id))    
   },[state.user.user_id])
+  
 
   return (
     <div className="App">
@@ -85,4 +86,5 @@ function App() {
   );
 }
 
-export default withAuthenticator(App);
+// export default withAuthenticator(App);
+export default App;
