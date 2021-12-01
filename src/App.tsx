@@ -74,7 +74,7 @@ function App() {
         <Button onClick={()=>navigate('/subeventregi/sub')}><AddIcon />定期イベント新規登録 </Button>
         <Button onClick={()=>navigate('/subeventregi/sp')}><AddIcon />特殊イベント新規登録</Button>
       </span>}
-      {/* <button onClick={consoleStore}>state</button>                  */}
+      <button onClick={consoleStore}>state</button>
       <Routes>
         <Route path="/" element={<Calender />} />
         <Route path="reserve/:id" element={<Reserve />}/>  
@@ -86,5 +86,10 @@ function App() {
   );
 }
 
-// export default withAuthenticator(App);
-export default App;
+
+export default withAuthenticator(App, {
+  // @ts-ignore
+  signUpConfig: {
+    hiddenDefaults: ['phone_number']
+  }
+});

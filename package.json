@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@aws-amplify/ui-react": "^1.2.24",
+    "@cypress/instrument-cra": "^1.4.0",
     "@date-io/date-fns": "^1.3.13",
     "@date-io/dayjs": "^1.3.13",
     "@date-io/luxon": "^1.3.13",
@@ -73,6 +74,10 @@
   },
   "devDependencies": {
     "@types/react-color": "^3.0.6",
-    "@types/react-router-dom": "^5.3.2"
+    "@types/react-router-dom": "^5.3.2",
+    "cypress": "^9.1.0",
+    "mocha": "^9.1.3",
+    "mochawesome": "^4.1.0",
+    "start-server-and-test": "^1.14.0"
   }
 }
